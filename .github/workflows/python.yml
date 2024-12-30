@@ -1,0 +1,54 @@
+name: Python Dependency and Vulnerability Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+      - test
+
+jobs:
+  Python-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      # Install Python tools
+      - name: Install Python tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-review safety
+
+      # Check Python outdated packages
+      - name: Check Python outdated packages
+        run: |
+          pip-review --local --outdated > python_outdated.txt || true
+          cat python_outdated.txt
+          if [ -s python_outdated.txt ]; then
+            echo "Outdated Python packages detected with latest versions available:"
+            cat python_outdated.txt
+            exit 1
+          else
+            echo "All Python packages are up to date."
+          fi
+
+      # Check Python vulnerabilities
+      - name: Run Safety CLI to check for vulnerabilities
+        uses: pyupio/safety-action@v1
+        with:
+          api-key: '81919e15-f76a-4b4e-a0cf-aa27f74a31b1'
+          output-format: json
+

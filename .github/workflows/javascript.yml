@@ -1,4 +1,4 @@
-name: Dependency and Vulnerability Check
+name: JavaScript Dependency and Vulnerability Check
 
 on:
   pull_request:
@@ -12,54 +12,21 @@ on:
       - test
 
 jobs:
-  security:
+  Javascript-check:
     runs-on: ubuntu-latest
+
     steps:
       # Checkout the code
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
-
-      - name: Install Python tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install pip-review safety
-
-      # Check Python outdated packages
-      - name: Check Python outdated packages
-        run: |
-          pip-review --local --outdated > python_outdated.txt || true
-          cat python_outdated.txt
-          if [ -s python_outdated.txt ]; then
-            echo "Outdated Python packages detected with latest versions available:"
-            cat python_outdated.txt
-          else
-            echo "All Python packages are up to date."
-          fi
-
-      # Check Python vulnerabilities
-      - name: Run Safety CLI to check for vulnerabilities
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: '81919e15-f76a-4b4e-a0cf-aa27f74a31b1'
-          output-format: json
-          # args: --detailed-output # To always see detailed output from this action
-        
-      - name: Safety check Complete
-        run: |
-          echo "Python vulnerability scan completed."
-
       # Set up Node.js environment
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.x'  # Specifying Node.js LTS version directly
+          node-version: '18.x'
 
+      # Install npm tools
       - name: Install npm tools
         run: |
           npm install -g npm-check-updates
@@ -67,7 +34,7 @@ jobs:
       # Generate package-lock.json if it doesn't exist
       - name: Ensure package-lock.json exists
         run: |
-          npm install --package-lock-only || true  # Ensures package-lock.json is created if missing
+          npm install --package-lock-only || true
 
       # Check JavaScript outdated packages
       - name: Check JavaScript outdated packages
@@ -77,16 +44,15 @@ jobs:
           if [ -s js_outdated.json ]; then
             echo "Outdated JavaScript packages detected with latest versions available:"
             cat js_outdated.json
+            exit 1
           else
             echo "All JavaScript packages are up to date."
           fi
 
-      
       - name: Check JavaScript vulnerabilities
         run: |
-          # Run npm audit and save the results in JSON format
           npm audit --json > npm_audit.json || true
-            
+          
           # Print the audit summary
           echo "Vulnerability Audit Summary:"
         
@@ -102,4 +68,3 @@ jobs:
               range: .value.range
             } | 
             "Package: \(.name)\nSeverity: \(.severity)\nTitle: \(.title)\nURL: \(.url)\nFix Available: \(.fixAvailable)\nAffected Range: \(.range)\n"'
-        
