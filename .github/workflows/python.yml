@@ -48,19 +48,18 @@ jobs:
       - name: Run Safety CLI to check for vulnerabilities
         run: |
             safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --detailed-output --save-as json results.json || true
+            # Check the exit code of the safety command and handle failure
+             if [ $? -eq 64 ]; then
+                echo "Scan-failing vulnerabilities were found. Exiting with status 1."
+                exit 1
+             fi
 
     # Parse and print vulnerabilities from the Safety scan results
       - name: Parse and print vulnerabilities from Safety scan
         run: |
             echo "Vulnerabilities found in the Safety scan:"
             jq '.' results.json
-            # Check the exit code of the safety command and handle failure
-             if [ $? -eq 64 ]; then
-                echo "Scan-failing vulnerabilities were found. Exiting with status 1."
-                exit 1
-             else
-                echo "Python vulnerability scan completed."
-             fi
+            echo "Python vulnerability scan completed."
         
     
     

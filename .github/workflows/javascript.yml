@@ -67,3 +67,12 @@ jobs:
               range: .value.range
             } | 
             "Package: \(.name)\nSeverity: \(.severity)\nTitle: \(.title)\nURL: \(.url)\nFix Available: \(.fixAvailable)\nAffected Range: \(.range)\n"'
+
+          # Check if vulnerabilities were found and exit with 1 if any are present
+          vulnerabilities_count=$(cat npm_audit.json | jq '.vulnerabilities | length')
+          if [ "$vulnerabilities_count" -gt 0 ]; then
+            echo "Vulnerabilities found! Exiting with status 1."
+            exit 1
+          else
+            echo "No vulnerabilities found."
+          fi
