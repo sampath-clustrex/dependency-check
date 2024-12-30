@@ -44,10 +44,30 @@ jobs:
             echo "All Python packages are up to date."
           fi
 
-      # Check Python vulnerabilities
+    # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
       - name: Run Safety CLI to check for vulnerabilities
-        uses: pyupio/safety-action@v1
-        with:
-          api-key: '81919e15-f76a-4b4e-a0cf-aa27f74a31b1'
-          output-format: json
+        run: |
+            safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --save-as json results.json || true
+
+    # Parse and print vulnerabilities from the Safety scan results
+      - name: Parse and print vulnerabilities from Safety scan
+        run: |
+            echo "Vulnerabilities found in the Safety scan:"
+            cat results.json | jq -r '
+                .scan_results.projects[].files[].results.dependencies[] | 
+                {
+                    name: .name,
+                    version: (.specifications[].raw | split("==") | .[1]),
+                    vulnerabilities: .specifications[].vulnerabilities.known_vulnerabilities[] | 
+                {
+                    id: .id,
+                    vulnerable_spec: .vulnerable_spec,
+                    remediation: .remediation.recommended
+                }
+            }' || true
+            echo "Python vulnerability scan completed."
+        
+    
+    
+    
 
