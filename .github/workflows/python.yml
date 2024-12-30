@@ -53,18 +53,7 @@ jobs:
       - name: Parse and print vulnerabilities from Safety scan
         run: |
             echo "Vulnerabilities found in the Safety scan:"
-            cat results.json | jq -r '
-                .scan_results.projects[].files[].results.dependencies[] | 
-                {
-                    name: .name,
-                    version: (.specifications[].raw | split("==") | .[1]),
-                    vulnerabilities: .specifications[].vulnerabilities.known_vulnerabilities[] 
-                {
-                    id: .specifications[].vulnerabilities.known_vulnerabilities[].id,
-                    vulnerable_spec: .specifications[].vulnerabilities.known_vulnerabilities[].vulnerable_spec,
-                    remediation: .specifications[].remediation.recommended
-                }
-            }' || true
+            cat results.json
             echo "Python vulnerability scan completed."
         
     
