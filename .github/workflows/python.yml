@@ -62,7 +62,7 @@ jobs:
                 {
                     id: .id,
                     vulnerable_spec: .vulnerable_spec,
-                    remediation: .specifications[].vulnerabilities.remediation.recommended
+                    remediation: .specifications[].remediation.recommended
                 }
             }' || true
             echo "Python vulnerability scan completed."
