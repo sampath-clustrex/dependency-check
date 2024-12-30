@@ -43,6 +43,10 @@ jobs:
           fi
 
       # Check Python vulnerabilities
+      - name: Debugging API Key Access
+        run: |
+          echo "SAFETY_API_KEY is set to: ${{ secrets.SAFETY_API_KEY }}"
+
       - name: Run Safety CLI to check for vulnerabilities
         uses: pyupio/safety-action@v1
         with:
