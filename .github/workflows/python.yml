@@ -44,24 +44,23 @@ jobs:
             echo "All Python packages are up to date."
           fi
 
-    # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
+      # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
       - name: Run Safety CLI to check for vulnerabilities
         run: |
-            safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --detailed-output --save-as json results.json || true
-            # Check the exit code of the safety command and handle failure
-             if [ $? -eq 64 ]; then
-                echo "Scan-failing vulnerabilities were found. Exiting with status 1."
-                exit 1
-             fi
+          safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --detailed-output --save-as json results.json || true
 
-    # Parse and print vulnerabilities from the Safety scan results
-      - name: Parse and print vulnerabilities from Safety scan
+      # Parse the Safety scan results and check for vulnerabilities
+      - name: Parse and check vulnerabilities from Safety scan
         run: |
-            echo "Vulnerabilities found in the Safety scan:"
-            jq '.' results.json
-            echo "Python vulnerability scan completed."
-        
-    
-    
-    
-
+          echo "Vulnerability scan results:"
+          # Extract and count the number of vulnerabilities found in the 'dependencies' section
+          vulnerabilities_count=$(jq '[.scan_results.files[].results.dependencies[].vulnerabilities.known_vulnerabilities | length] | add' results.json)
+          
+          # If any vulnerabilities are found, exit with status 1
+          if [ "$vulnerabilities_count" -gt 0 ]; then
+            echo "Vulnerabilities found! Exiting with status 1."
+            jq '.scan_results.files[].results.dependencies[].vulnerabilities' results.json
+            exit 1
+          else
+            echo "No vulnerabilities found."
+          fi
