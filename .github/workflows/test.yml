@@ -1,0 +1,76 @@
+name: Dependency and Vulnerability Check
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+      - test
+
+jobs:
+  buildY:
+    runs-on: ubuntu-latest
+    steps:
+      # Checkout the code
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install Python tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install pip-review safety
+
+      - name: Check Python outdated packages
+        run: |
+          pip-review --local --latest > python_outdated.txt || true
+          cat python_outdated.txt
+          if [ -s python_outdated.txt ]; then
+            echo "Outdated Python packages detected with latest versions available:"
+            cat python_outdated.txt
+          else
+            echo "All Python packages are up to date."
+          fi
+
+      - name: Check Python vulnerabilities
+        run: |
+          safety check --full-report --output safety_report.txt || true
+          cat safety_report.txt
+          echo "Python vulnerability scan completed."
+
+      # Set up Node.js environment
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts'
+
+      - name: Install npm tools
+        run: |
+          npm install -g npm-check-updates
+
+      - name: Check JavaScript outdated packages
+        run: |
+          ncu --upgrade --jsonUpgraded > js_outdated.json || true
+          cat js_outdated.json
+          if [ -s js_outdated.json ]; then
+            echo "Outdated JavaScript packages detected with latest versions available:"
+            cat js_outdated.json
+          else
+            echo "All JavaScript packages are up to date."
+          fi
+
+      - name: Check JavaScript vulnerabilities
+        run: |
+          npm audit --json > npm_audit.json || true
+          cat npm_audit.json | jq '.advisories[] | {module, severity, title, url}' > npm_audit_summary.json
+          echo "Vulnerability Summary:"
+          cat npm_audit_summary.json
