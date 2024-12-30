@@ -30,9 +30,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install pip-review safety
 
+      # Check Python outdated packages
       - name: Check Python outdated packages
         run: |
-          pip-review --local --latest > python_outdated.txt || true
+          # Removed '--latest' as it's not supported by 'pip list'
+          pip-review --local --outdated > python_outdated.txt || true
           cat python_outdated.txt
           if [ -s python_outdated.txt ]; then
             echo "Outdated Python packages detected with latest versions available:"
@@ -41,6 +43,7 @@ jobs:
             echo "All Python packages are up to date."
           fi
 
+      # Check Python vulnerabilities
       - name: Check Python vulnerabilities
         run: |
           safety check --full-report --output text > safety_report.txt || true
@@ -51,12 +54,13 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 'lts'
+          node-version: '18.x'  # Specifying Node.js LTS version directly
 
       - name: Install npm tools
         run: |
           npm install -g npm-check-updates
 
+      # Check JavaScript outdated packages
       - name: Check JavaScript outdated packages
         run: |
           ncu --upgrade --jsonUpgraded > js_outdated.json || true
@@ -68,6 +72,7 @@ jobs:
             echo "All JavaScript packages are up to date."
           fi
 
+      # Check JavaScript vulnerabilities
       - name: Check JavaScript vulnerabilities
         run: |
           npm audit --json > npm_audit.json || true
