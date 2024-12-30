@@ -1,19 +1,27 @@
 {
-    "name": "vulnerable-project",
+    "name": "safe-app",
     "version": "1.0.0",
-    "description": "A project with outdated and vulnerable packages",
+    "description": "A secure application with updated dependencies",
     "main": "index.js",
     "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1"
+      "start": "node index.js",
+      "test": "jest"
     },
     "dependencies": {
-      "express": "4.16.4", 
-      "lodash": "4.17.10",   
-      "chalk": "2.4.2"      
+      "express": "^4.18.2",
+      "axios": "^1.5.0",
+      "lodash": "^4.17.21",
+      "react": "^18.3.0",
+      "react-dom": "^18.3.0",
+      "body-parser": "^1.20.2",
+      "dotenv": "^16.3.1"
     },
-    "devDependencies": {},
+    "devDependencies": {
+      "jest": "^29.7.0",
+      "eslint": "^8.53.0"
+    },
     "engines": {
-      "node": ">=6.0.0"
+      "node": ">=18.0.0"
     }
   }
   
