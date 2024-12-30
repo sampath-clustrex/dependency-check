@@ -13,6 +13,8 @@ on:
 
 jobs:
   security:
+    env:
+      SECRET_API_KEY: '81919e15-f76a-4b4e-a0cf-aa27f74a31b1'
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
@@ -43,14 +45,10 @@ jobs:
           fi
 
       # Check Python vulnerabilities
-      - name: Debugging API Key Access
-        run: |
-          echo "SAFETY_API_KEY is set to: ${{ secrets.SAFETY_API_KEY }}"
-
       - name: Run Safety CLI to check for vulnerabilities
         uses: pyupio/safety-action@v1
         with:
-          api-key: ${{ secrets.SAFETY_API_KEY }}
+          api-key: $env.SAFETY_API_KEY
           output-format: json
           args: --detailed-output # To always see detailed output from this action
         
