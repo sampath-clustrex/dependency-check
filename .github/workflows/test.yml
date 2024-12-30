@@ -48,7 +48,7 @@ jobs:
         with:
           api-key: '81919e15-f76a-4b4e-a0cf-aa27f74a31b1'
           output-format: json
-          args: --detailed-output # To always see detailed output from this action
+          # args: --detailed-output # To always see detailed output from this action
         
       - name: Safety check Complete
         run: |
