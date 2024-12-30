@@ -54,7 +54,7 @@ jobs:
 
     - name: Fail if any outdated packages are found
       run: |
-        OUTDATED=$(pip list --outdated --format=freeze)
+        OUTDATED=$(pip list --outdated)
         if [ -n "$OUTDATED" ]; then
           echo "Outdated packages detected!"
           echo "$OUTDATED"
