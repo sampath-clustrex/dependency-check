@@ -80,7 +80,5 @@ jobs:
       - name: Check JavaScript vulnerabilities
         run: |
           npm audit --json > npm_audit.json || true
-          # Ensure valid JSON parsing with jq
-          cat npm_audit.json | jq '.advisories[]? | {module: .module_name, severity: .severity, title: .title, url: .url}' > npm_audit_summary.json || true
           echo "Vulnerability Summary:"
-          cat npm_audit_summary.json
+          cat npm_audit.json
