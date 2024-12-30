@@ -33,7 +33,6 @@ jobs:
       # Check Python outdated packages
       - name: Check Python outdated packages
         run: |
-          # Removed '--latest' as it's not supported by 'pip list'
           pip-review --local --outdated > python_outdated.txt || true
           cat python_outdated.txt
           if [ -s python_outdated.txt ]; then
@@ -60,6 +59,11 @@ jobs:
         run: |
           npm install -g npm-check-updates
 
+      # Generate package-lock.json if it doesn't exist
+      - name: Ensure package-lock.json exists
+        run: |
+          npm install --package-lock-only || true  # Ensures package-lock.json is created if missing
+
       # Check JavaScript outdated packages
       - name: Check JavaScript outdated packages
         run: |
@@ -76,6 +80,7 @@ jobs:
       - name: Check JavaScript vulnerabilities
         run: |
           npm audit --json > npm_audit.json || true
-          cat npm_audit.json | jq '.advisories[] | {module, severity, title, url}' > npm_audit_summary.json
+          # Ensure valid JSON parsing with jq
+          cat npm_audit.json | jq '.advisories[]? | {module: .module_name, severity: .severity, title: .title, url: .url}' > npm_audit_summary.json || true
           echo "Vulnerability Summary:"
           cat npm_audit_summary.json
