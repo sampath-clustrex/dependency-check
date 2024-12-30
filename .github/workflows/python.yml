@@ -46,7 +46,7 @@ jobs:
 
       # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
       - name: Run pip-audit to check for vulnerabilities
-        uses: pypa/gh-action-pip-audit@v1.1.0
+        uses: pypa/gh-action-pip-audit@v1.0.0
         with:
           inputs: requirements.txt
 
