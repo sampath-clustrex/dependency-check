@@ -53,7 +53,7 @@ jobs:
       - name: Parse and print vulnerabilities from Safety scan
         run: |
             echo "Vulnerabilities found in the Safety scan:"
-            cat results.json
+            jq '.' results.json
             echo "Python vulnerability scan completed."
         
     
