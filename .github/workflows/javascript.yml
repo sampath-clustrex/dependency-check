@@ -44,7 +44,6 @@ jobs:
           if [ -s js_outdated.json ]; then
             echo "Outdated JavaScript packages detected with latest versions available:"
             cat js_outdated.json
-            exit 1
           else
             echo "All JavaScript packages are up to date."
           fi

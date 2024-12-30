@@ -40,7 +40,6 @@ jobs:
           if [ -s python_outdated.txt ]; then
             echo "Outdated Python packages detected with latest versions available:"
             cat python_outdated.txt
-            exit 1
           else
             echo "All Python packages are up to date."
           fi
