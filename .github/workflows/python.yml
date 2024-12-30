@@ -52,15 +52,13 @@ jobs:
       # Parse the Safety scan results and check for vulnerabilities
       - name: Parse and check vulnerabilities from Safety scan
         run: |
-          echo "Vulnerability scan results:"
-          # Extract and count the number of vulnerabilities found in the 'dependencies' section
-          vulnerabilities_count=$(jq '[.scan_results.files[].results.dependencies[].vulnerabilities.known_vulnerabilities | length] | add' results.json)
-          
-          # If any vulnerabilities are found, exit with status 1
-          if [ "$vulnerabilities_count" -gt 0 ]; then
-            echo "Vulnerabilities found! Exiting with status 1."
-            jq '.scan_results.files[].results.dependencies[].vulnerabilities' results.json
-            exit 1
-          else
-            echo "No vulnerabilities found."
-          fi
+            echo "Vulnerability scan results:"
+            vulnerabilities_count=$(cat results.json | jq -r '[.scan_results.projects[].files[].results.dependencies[].specifications[].vulnerabilities.remediation.vulnerabilities_found] | add // 0')
+            echo "Total vulnerabilities found: $vulnerabilities_count"
+            if [ "$vulnerabilities_count" -gt 0 ]; then
+                jq '.' results.json
+                echo "Vulnerabilities detected! Exiting with status 1."
+                exit 1
+            else
+                echo "No vulnerabilities found. Proceeding..."
+            fi
