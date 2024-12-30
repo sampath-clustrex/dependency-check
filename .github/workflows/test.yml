@@ -45,7 +45,7 @@ jobs:
       # Check Python vulnerabilities
       - name: Check Python vulnerabilities
         run: |
-          safety check --full-report --output text > safety_report.txt || true
+          safety scan --full-report --output text > safety_report.txt || true
           cat safety_report.txt
           echo "Python vulnerability scan completed."
 
@@ -76,9 +76,25 @@ jobs:
             echo "All JavaScript packages are up to date."
           fi
 
-      # Check JavaScript vulnerabilities
+      
       - name: Check JavaScript vulnerabilities
         run: |
+          # Run npm audit and save the results in JSON format
           npm audit --json > npm_audit.json || true
-          echo "Vulnerability Summary:"
-          cat npm_audit.json
+            
+          # Print the audit summary
+          echo "Vulnerability Audit Summary:"
+        
+          # Parse and format the audit report using jq
+          cat npm_audit.json | jq -r '
+            .vulnerabilities | to_entries[] | 
+            {
+              name: .value.name,
+              severity: .value.severity,
+              title: .value.via[0].title,
+              url: .value.via[0].url,
+              fixAvailable: .value.fixAvailable,
+              range: .value.range
+            } | 
+            "Package: \(.name)\nSeverity: \(.severity)\nTitle: \(.title)\nURL: \(.url)\nFix Available: \(.fixAvailable)\nAffected Range: \(.range)\n"'
+        
