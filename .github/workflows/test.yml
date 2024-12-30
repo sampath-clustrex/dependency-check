@@ -12,7 +12,7 @@ on:
       - test
 
 jobs:
-  buildY:
+  build:
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
@@ -43,7 +43,7 @@ jobs:
 
       - name: Check Python vulnerabilities
         run: |
-          safety check --full-report --output safety_report.txt || true
+          safety check --full-report --output text > safety_report.txt || true
           cat safety_report.txt
           echo "Python vulnerability scan completed."
 
