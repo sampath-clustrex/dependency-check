@@ -47,7 +47,7 @@ jobs:
     # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
       - name: Run Safety CLI to check for vulnerabilities
         run: |
-            safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --save-as json results.json || true
+            safety --key 81919e15-f76a-4b4e-a0cf-aa27f74a31b1 scan --detailed-output --save-as json results.json || true
 
     # Parse and print vulnerabilities from the Safety scan results
       - name: Parse and print vulnerabilities from Safety scan
@@ -58,10 +58,10 @@ jobs:
                 {
                     name: .name,
                     version: (.specifications[].raw | split("==") | .[1]),
-                    vulnerabilities: .specifications[].vulnerabilities.known_vulnerabilities[] | 
+                    vulnerabilities: .specifications[].vulnerabilities.known_vulnerabilities[] 
                 {
-                    id: .id,
-                    vulnerable_spec: .vulnerable_spec,
+                    id: .specifications[].vulnerabilities.known_vulnerabilities[].id,
+                    vulnerable_spec: .specifications[].vulnerabilities.known_vulnerabilities[].vulnerable_spec,
                     remediation: .specifications[].remediation.recommended
                 }
             }' || true
