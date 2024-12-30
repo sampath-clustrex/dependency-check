@@ -1,53 +1,64 @@
-name: Python Dependency and Vulnerability Check
+name: Python Dependency Security Audit and Outdated Packages Check
 
 on:
-  pull_request:
-    branches:
-      - main
-      - master
   push:
     branches:
       - main
       - master
       - test
+  pull_request:
+    branches:
+      - main
+      - master
 
 jobs:
   Python-check:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
-      - name: Checkout code
-        uses: actions/checkout@v3
+    - name: Check out code
+      uses: actions/checkout@v2
 
-      # Set up Python environment
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'  # Adjust to your project's Python version
 
-      # Install Python tools
-      - name: Install Python tools
-        run: |
-          python -m pip install --upgrade pip
-          pip install pip-review
+    - name: Cache pip dependencies
+      uses: actions/cache@v2
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-dependencies-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-dependencies-
 
-      # Check Python outdated packages
-      - name: Check Python outdated packages
-        run: |
-          pip-review --local --outdated > python_outdated.txt || true
-          cat python_outdated.txt
-          if [ -s python_outdated.txt ]; then
-            echo "Outdated Python packages detected with latest versions available:"
-            cat python_outdated.txt
-          else
-            echo "All Python packages are up to date."
-          fi
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
 
-      # Run Safety CLI to check for vulnerabilities and save the output in a JSON file
-      - name: Run pip-audit to check for vulnerabilities
-        uses: pypa/gh-action-pip-audit@v1.0.0
-        with:
-          inputs: requirements.txt
+    - name: Install pip-audit
+      run: pip install pip-audit
 
-      
+    - name: Run pip-audit
+      run: pip-audit -r requirements.txt  # Adjust if using other lock files like Pipfile.lock or poetry.lock
+
+    - name: Fail the build if vulnerabilities found
+      run: |
+        pip-audit -r requirements.txt || exit 1  # Exit with code 1 if vulnerabilities are found
+
+    - name: Check for outdated packages
+      run: |
+        echo "Checking for outdated packages..."
+        pip list --outdated || true  # Prints outdated packages; || true ensures the job doesn't fail
+
+    - name: Fail if any outdated packages are found
+      run: |
+        OUTDATED=$(pip list --outdated --format=freeze)
+        if [ -n "$OUTDATED" ]; then
+          echo "Outdated packages detected!"
+          echo "$OUTDATED"
+          exit 1
+        else
+          echo "No outdated packages found."
+        fi
