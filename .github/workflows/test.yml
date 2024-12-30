@@ -12,7 +12,7 @@ on:
       - test
 
 jobs:
-  build:
+  security:
     runs-on: ubuntu-latest
     steps:
       # Checkout the code
@@ -43,10 +43,15 @@ jobs:
           fi
 
       # Check Python vulnerabilities
-      - name: Check Python vulnerabilities
+      - name: Run Safety CLI to check for vulnerabilities
+        uses: pyupio/safety-action@v1
+        with:
+          api-key: ${{ secrets.SAFETY_API_KEY }}
+          output-format: json
+          args: --detailed-output # To always see detailed output from this action
+        
+      - name: Safety check Complete
         run: |
-          safety scan --full-report --output text > safety_report.txt || true
-          cat safety_report.txt
           echo "Python vulnerability scan completed."
 
       # Set up Node.js environment
